@@ -41,6 +41,8 @@ for category_link in category_links:
                     'instructions': instructions
                 })
 def clean_html(raw_html):
+    if isinstance(raw_html, float):
+        return ""
     soup = BeautifulSoup(raw_html,'html.parser')
     return soup.get_text(separator=' ').strip()
 
