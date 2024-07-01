@@ -37,34 +37,45 @@ for category_link in category_links:
                 recipe_soup = BeautifulSoup(recipe_response.text, 'html.parser')
 
                 #Finds and extracts the details of the recipes
-                title = recipe_soup.find('h1').text.strip()
+                title_tag= recipe_soup.find('h1')
+                title = title_tag.text.strip() if title_tag else None
+
                 ingredients = [li.text.strip() for li in recipe_soup.find_all('li', class_='mm-recipes-structured-ingredients__list-item')]
-                instructions = recipe_soup.find('div', class_='comp mm-recipes-steps__content mntl-sc-page mntl-block')
+                ingredients = ', '.join(ingredients) if ingredients else None
+
+                instructions_div = recipe_soup.find('div', class_='comp mm-recipes-steps__content mntl-sc-page mntl-block')
+                instructions = instructions_div.get_text(separator=' ').strip() if instructions_div else None
+
+                #Entry is skipped if any fields are missing
+                if not title or not ingredients or not instructions:
+                    continue
 
                 recipes.append({
                     'title': title,
-                    'ingredients': ', '.join(ingredients),
+                    'ingredients': ingredients,
                     'instructions': instructions
                 })
-#Removes HTML elements from a .csv file
-def clean_html(raw_html):
-    if isinstance(raw_html, float):
-        return ""
-    soup = BeautifulSoup(raw_html,'html.parser')
-    text = soup.get_text(separator=' ').strip()
-    return ' '.join(text.split())
-
-#Uses clean_html and transfers clean text from original csv to new csv
-df = pd.read_csv('recipes.csv')
-df['instructions'] = df['instructions'].apply(clean_html)
-df.to_csv('cleaned_recipes.csv', index=False)
-
 df = pd.DataFrame(recipes)
 df.to_csv('recipes.csv', index = False)
 
-df = pd.read_csv('cleaned_recipes.csv')
+# Removes HTML elements from a .csv file
+def clean_html(raw_html):
+    if isinstance(raw_html, float):
+        return ""
+    soup = BeautifulSoup(str(raw_html),'html.parser')
+    text = soup.get_text(separator=' ').strip()
+    text = ' '.join(text.split())
+    return text
+
+# Uses clean_html and transfers clean text from original csv to new csv
+df['instructions'] = df['instructions'].apply(clean_html)
+df.to_csv('cleaned_recipes.csv', index=False)
+
+
+
+# Creates and transfers the into formatted into a .txt file
 with open('recipes.txt', 'w', encoding='utf-8') as f:
-    for _, row in df. iterrows():
+    for _, row in df.iterrows():
         f.write(f"Title: {row['title']}\nIngredients: {row['ingredients']}\nInstructions: {row['instructions']}\n\n")
 
     
