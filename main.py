@@ -81,8 +81,23 @@ def clean_html(raw_html):
     text = ' '.join(text.split())
     return text
 
+def preprocess(df):
+    df.dropna(subset=['ingredients, instructions'], inplace=True)
+    df['ingredients'] = df['ingredients'].apply(lambda x: x.lower().split())
+    df['instructions'] = df['instructions'].apply(lambda x: x.lower())
+    return df
+
 def load_data():
     if os.path.exists('cleaned_recipes.csv'):
         return pd.read_csv('cleaned_recipes.csv')
     else:
         return recipe_scraper()
+
+if __name__ == "__main__":
+    recipes_df = load_data
+    recipes_df = preprocess(recipes_df)
+
+from transformers import GPT2Tokenizer
+
+def tokenization(data):
+    
