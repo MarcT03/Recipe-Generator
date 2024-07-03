@@ -1,4 +1,5 @@
 import requests
+import os
 from bs4 import BeautifulSoup
 import pandas as pd
 
@@ -55,15 +56,17 @@ def recipe_scraper():
                         'ingredients': ingredients,
                         'instructions': instructions
                     })
+
     df = pd.DataFrame(recipes)
-    df.to_csv('recipes.csv', index = False)
+    os.makedirs('data', exist_ok=True)
+    df.to_csv('data/recipes.csv', index = False)
 
     # Uses clean_html and transfers clean text from original csv to new csv
     df['instructions'] = df['instructions'].apply(clean_html)
-    df.to_csv('cleaned_recipes.csv', index=False)
+    df.to_csv('data/cleaned_recipes.csv', index=False)
 
     # Creates and transfers the into formatted into a .txt file
-    with open('recipes.txt', 'w', encoding='utf-8') as f:
+    with open('data/recipes.txt', 'w', encoding='utf-8') as f:
         for _, row in df.iterrows():
             f.write(f"Title: {row['title']}\nIngredients: {row['ingredients']}\nInstructions: {row['instructions']}\n\n")
 
