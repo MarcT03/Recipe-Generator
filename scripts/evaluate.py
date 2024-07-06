@@ -1,4 +1,5 @@
 import torch
+import os
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
@@ -23,6 +24,7 @@ def calc_perplexity(data, model, tokenizer):
     perplexity = torch.exp(total_log_likelihood/total_length)
     return perplexity.item()
 
+
 def calc_bleu(references, hypothesis):
     smooth = SmoothingFunction().method4
     scores = [] # Empty list to store Bleu scores
@@ -36,3 +38,53 @@ def calc_bleu(references, hypothesis):
     # Returns the average Bleu score
     return sum(scores)/len(scores)
 
+def evaluate():
+
+    # Load pretrained model and tokenizer as seen throughout the code
+    model = GPT2LMHeadModel.from_pretrained('./results')
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+
+    tokenizer.pad_token = tokenizer.eos_token
+
+    example_imputs = [
+        'tomato, beef, onion, potatoes',
+        'chicken, garlic, beans, rice'
+    ]
+
+    references = [
+        'Cook the onion in a pan with oil until caramelized. Add the beef and cook until golden brown. Add chopped tomatoes. In a separate pan, cook chopped potatoes with oil until soft.'
+        'Slowly cook the chicken in a pan until the chicke is properly cooked and golden brown. Add garlic for flavor. Serve with beans and rice. '
+    ]
+
+    # Tokenizes example inputs into suitable format
+    inputs = tokenizer(example_imputs, return_tensors = 'pt', padding=True, truncation=True, max_length=512)
+    attention_mask = inputs['attention_mask']
+
+    # Generates model predictions without calculating gradients
+    model.eval()
+    with torch.no_grad():
+        outputs = model.generate(
+            inputs['input_ids'], 
+            attention_mask=attention_mask,
+            max_length=512, 
+            num_return_sequences=1, 
+            no_repeat_ngram_size=2,
+            num_beams=5, 
+            early_stopping=True
+            )
+
+    output_texts = []
+    for i, output in enumerate(outputs):
+        output_text = tokenizer.decode(output, skip_special_token=True)
+        output_texts.append(output_text)
+        print(f"Input: {example_imputs[i]}")
+        print(f"Generated Recipe: {output_text}\n")
+    
+    perplexity = calc_perplexity(example_imputs, model, tokenizer)
+    print(f"Perplexity: {perplexity}")
+
+    bleu_score = calc_bleu(references, output_texts)
+    print(f"Bleu score: {bleu_score}")
+
+if __name__ == "__main__":
+    evaluate()

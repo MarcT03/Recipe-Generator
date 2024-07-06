@@ -29,7 +29,7 @@ def recipe_scraper():
             recipe_links = [a['href'] for a in category_soup.find_all('a', class_='comp mntl-card-list-items mntl-document-card mntl-card card--image-top card card--no-image')]
             
 
-            for recipe_link in recipe_links[:5]:
+            for recipe_link in recipe_links:
                 #Scrapes each recipe
                 recipe_url = recipe_link
                 recipe_response = requests.get(recipe_url, headers=headers, timeout=30)
