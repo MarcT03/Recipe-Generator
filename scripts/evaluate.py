@@ -3,6 +3,11 @@ import os
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
+def get_latest_checkpoint(directory):
+    checkpoints = [d for d in os.listdir(directory) if d.startswith('checkpoint-')]
+    latest_checkpoint = max(checkpoints, key=lambda x: int(x.split('-')[1]))
+    return os.path.join(directory, latest_checkpoint)
+
 def calc_perplexity(data, model, tokenizer):
     # sets the model to evaluation mode & initializes two variables
     model.eval()
@@ -39,9 +44,11 @@ def calc_bleu(references, hypothesis):
     return sum(scores)/len(scores)
 
 def evaluate():
+    results_dir = './results'
+    latest_checkpoint = get_latest_checkpoint(results_dir)
 
     # Load pretrained model and tokenizer as seen throughout the code
-    model = GPT2LMHeadModel.from_pretrained('./results')
+    model = GPT2LMHeadModel.from_pretrained(latest_checkpoint)
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
     tokenizer.pad_token = tokenizer.eos_token
@@ -70,7 +77,8 @@ def evaluate():
             num_return_sequences=1, 
             no_repeat_ngram_size=2,
             num_beams=5, 
-            early_stopping=True
+            early_stopping=True,
+            pad_token_id = tokenizer.eos_token
             )
 
     output_texts = []
