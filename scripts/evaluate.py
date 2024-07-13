@@ -51,7 +51,8 @@ def evaluate():
     model = GPT2LMHeadModel.from_pretrained(latest_checkpoint)
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
-    tokenizer.pad_token = tokenizer.eos_token
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
     example_imputs = [
         'tomato, beef, onion, potatoes',
@@ -71,14 +72,14 @@ def evaluate():
     model.eval()
     with torch.no_grad():
         outputs = model.generate(
-            inputs['input_ids'], 
+            inputs['input_ids'],
             attention_mask=attention_mask,
-            max_length=512, 
-            num_return_sequences=1, 
+            max_length=512,
+            num_return_sequences=1,
             no_repeat_ngram_size=2,
-            num_beams=5, 
+            num_beams=5,
             early_stopping=True,
-            pad_token_id = tokenizer.eos_token
+            pad_token_id = int(tokenizer.pad_token_id)
             )
 
     output_texts = []

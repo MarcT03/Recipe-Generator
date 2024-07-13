@@ -55,9 +55,10 @@ def train_model(recipes_df):
 
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=50,
+        num_train_epochs=3,
         per_device_eval_batch_size=8,
         per_device_train_batch_size=8,
+        gradient_accumulation_steps=4,
         warmup_steps=500,
         weight_decay=.01,
         logging_dir='./logs',
@@ -66,6 +67,7 @@ def train_model(recipes_df):
         save_strategy="epoch",
         save_total_limit=3,
         load_best_model_at_end=True,
+        dataloader_num_workers=4,
     )
 
     trainer = Trainer(

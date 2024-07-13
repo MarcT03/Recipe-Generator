@@ -1,13 +1,18 @@
 import requests
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from bs4 import BeautifulSoup
 import pandas as pd
 
-base_url = 'https://www.allrecipes.com/'
-main_url = f'{base_url}/recipes-a-z-6735880'
-headers = {'User-Agent': 'Mozilla/5.0'}
+
+
 
 def recipe_scraper():
+    base_url = 'https://www.allrecipes.com/'
+    main_url = f'{base_url}/recipes-a-z-6735880'
+    headers = {'User-Agent': 'Mozilla/5.0'}
+
     # Scrapes the main page
     main_response = requests.get(main_url, headers=headers,timeout=30)
     main_soup = BeautifulSoup(main_response.text, 'html.parser')
@@ -65,18 +70,22 @@ def recipe_scraper():
     df['instructions'] = df['instructions'].apply(clean_html)
     df.to_csv('data/cleaned_recipes.csv', index=False)
 
-    # Creates and transfers the into formatted into a .txt file
-    with open('data/recipes.txt', 'w', encoding='utf-8') as f:
-        for _, row in df.iterrows():
-            f.write(f"Title: {row['title']}\nIngredients: {row['ingredients']}\nInstructions: {row['instructions']}\n\n")
-
     return df      
 
 
 def clean_html(raw_html):
-    if isinstance(raw_html, float):
+    if isinstance(raw_html, float) or not raw_html:
         return ""
-    soup = BeautifulSoup(str(raw_html),'html.parser')
+    soup = BeautifulSoup(raw_html,'html.parser')
     text = soup.get_text(separator=' ').strip()
     text = ' '.join(text.split())
     return text
+
+
+if __name__ == "__main__":
+    from scripts.combine import combine_data, save_combined, generate_recipes_txt
+
+    df = recipe_scraper()
+    combined_df = combine_data()
+    save_combined(combined_df)
+    generate_recipes_txt(combined_df)
