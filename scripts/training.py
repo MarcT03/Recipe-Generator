@@ -56,8 +56,8 @@ def train_model(recipes_df):
     training_args = TrainingArguments(
         output_dir='./results',
         num_train_epochs=3,
-        per_device_eval_batch_size=8,
-        per_device_train_batch_size=8,
+        per_device_eval_batch_size=1,
+        per_device_train_batch_size=1,
         gradient_accumulation_steps=4,
         warmup_steps=500,
         weight_decay=.01,
