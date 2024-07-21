@@ -60,8 +60,8 @@ def evaluate():
     ]
 
     references = [
-        'Cook the onion in a pan with oil until caramelized. Add the beef and cook until golden brown. Add chopped tomatoes. In a separate pan, cook chopped potatoes with oil until soft.'
-        'Slowly cook the chicken in a pan until the chicke is properly cooked and golden brown. Add garlic for flavor. Serve with beans and rice. '
+        'Cook the onion in a pan with oil until caramelized. Add the beef and cook until golden brown. Add chopped tomatoes. In a separate pan, cook chopped potatoes with oil until soft.',
+        'Slowly cook the chicken in a pan until the chicken is properly cooked and golden brown. Add garlic for flavor. Serve with beans and rice. '
     ]
 
     # Tokenizes example inputs into suitable format
